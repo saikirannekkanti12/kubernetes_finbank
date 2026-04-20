@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: h2-to-postgres-migration
+  namespace: finbank-data
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrator
+        image: nvenkatasaikiran/finbank-h2-to-postgres-migrator:v1
+        env:
+        - name: H2_JDBC_URL
+          value: jdbc:h2:tcp://monolith.finbank-legacy.svc.cluster.local:9092/mem:finbank
+        - name: POSTGRES_JDBC_URL
+          value: jdbc:postgresql://postgres.finbank-data.svc.cluster.local:5432/finbank
+        - name: POSTGRES_USER
+          value: finbank
+        - name: POSTGRES_PASSWORD
+          value: finbank123
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Running one-time H2 -> PostgreSQL migration";
+          java -jar /app/migrator.jar;

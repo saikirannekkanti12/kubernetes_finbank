@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: transaction-retries
+  namespace: finbank-new
+spec:
+  hosts:
+  - transaction-service.finbank-new.svc.cluster.local
+  http:
+  - retries:
+      attempts: 4
+      perTryTimeout: 2s
+      retryOn: gateway-error,connect-failure,refused-stream,unavailable,5xx
+    timeout: 10s
+    route:
+    - destination:
+        host: transaction-service.finbank-new.svc.cluster.local
+        port:
+          number: 8082
