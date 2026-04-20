@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monolith
+  namespace: finbank-legacy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: monolith
+  template:
+    metadata:
+      labels:
+        app: monolith
+    spec:
+      containers:
+      - name: monolith
+        image: nvenkatasaikiran/finbank-monolith:v1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: postgres.finbank-data.svc.cluster.local
+        - name: DB_NAME
+          value: finbank
+        - name: DB_USER
+          value: finbank
+        - name: DB_PASSWORD
+          value: finbank123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monolith
+  namespace: finbank-legacy
+spec:
+  selector:
+    app: monolith
+  ports:
+  - port: 8080
+    targetPort: 8080
